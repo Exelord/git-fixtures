@@ -20,6 +20,10 @@ async function git(args, options) {
   return stdout;
 }
 
+function toLines(string) {
+  return string.split(/\r?\n/).filter(Boolean);
+}
+
 async function gitInit({
   cwd
 } = {}) {
@@ -297,7 +301,23 @@ async function cloneRemote({
     cwd: localPath
   });
 
+  let branchNames = await getLocalBranchNames({
+    cwd: localPath
+  });
+
+  for (let branchName of branchNames) {
+    // await git(['set-upstream', 'add', remoteName, remotePath], {
+    //   cwd: localPath
+    // });
+  }
+
   return remotePath;
+}
+
+async function getLocalBranchNames(options) {
+  let stdout = await git(['for-each-ref', '--format', '%(refname:short)', 'refs/heads'], options);
+
+  return toLines(stdout);
 }
 
 module.exports = {
